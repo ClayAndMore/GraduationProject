@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>康复网</title>
+
+    <!--网站图标-->
+    <link rel="Shortcut Icon" href="../static/img/hospitalIOCt.ico"/>
+    <!-- Bootstrap -->
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body>
+<div class="jumbotron"
+     style="position: relative;background:url('../static/img/forTitle.jpg')no-repeat right;background-size: 100%auto">
+    <h1>康复网</h1>
+    <p>是否对手术后的调养感到困惑？是否缺乏术后症状的知识点？请来这里</p>
+    <button type="button" class="btn btn-primary" onclick="toCummunityClick()"
+            style="position: absolute;bottom: 5px;right: 5px">进入康复社区
+    </button>
+</div>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#" onclick="showFirst()">术后康复网</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#" onclick="showFirst()">首页 <span class="sr-only">(current)</span></a></li>
+                <li><a href="#" onclick="waiButton()">外科</a></li>
+                <li><a href="#" onclick="fuChanButton()">妇产科</a></li>
+                <li><a id="eye" href="#" onclick="yanButton()">眼科</a></li>
+                <li><a href="#" onclick="erBiHouButton()">耳鼻喉科</a></li>
+                <li><a href="#" onclick="kouQiangButton()">口腔科</a></li>
+            </ul>
+
+            <ul class="navbar-right">
+                <button class="btn btn-default" onclick="searchOnclick()">查找</button>
+            </ul>
+            <ul class="navbar-right">
+                <input id="search_input" type="text" class="form-control" placeholder="如：清创术">
+            </ul>
+
+        </div><!-- /.navbar-collapse -->
+
+    </div><!-- /.container-fluid -->
+</nav>
+
+<!--选择科目后的切换控件-->
+<div id="tabPage" class="col-xs-12">
+
+
+</div>
+<div id="showFirst">
+    <div class="row">
+        <img src="../static/img/timg.jpg" class="col-xs-3 img-circle" title="针对性的术后康复方案">
+        <img src="../static/img/toShow.jpg" class="col-xs-3 img-circle" title="贴心的疾病交流处理">
+        <img src="../static/img/chinaImg.jpg" class="col-xs-3 img-circle" title="健康的中药调养治疗">
+        <img src="../static/img/equip.jpg" class="col-xs-3 img-circle" title="科学的康复锻炼器材">
+    </div>
+    <div class="row">
+        <h4 class="col-xs-3" align="center">针对性的术后康复方案</h4>
+        <h4 class="col-xs-3" align="center">贴心的疾病交流处理</h4>
+        <h4 class="col-xs-3" align="center">健康的中药调养治疗</h4>
+        <h4 class="col-xs-3" align="center">科学的康复锻炼器材</h4>
+    </div>
+</div>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<!--<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>-->
+<script src="../static/js/jquery.min-3.1.1.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="../static/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+<script src="../static/js/myjs/tabPageJS.js"></script>
+
+</body>
+</html>
