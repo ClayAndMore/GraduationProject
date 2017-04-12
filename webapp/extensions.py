@@ -1,13 +1,13 @@
 from webapp.models import db,User,Role
 
-from flask_wtf import CsrfProtect
+from flask_wtf import CSRFProtect
 from flask_security import SQLAlchemyUserDatastore
 from flask_mail import Mail
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_uploads import UploadSet
 
-csrf=CsrfProtect()
+csrf=CSRFProtect()
 mail=Mail()
 
 user_datastore=SQLAlchemyUserDatastore(db,User,Role)

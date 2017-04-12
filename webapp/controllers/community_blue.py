@@ -1,5 +1,8 @@
 # 这个社区登陆的蓝图
 
+import os
+import time
+
 from flask import Blueprint,redirect,url_for,render_template,abort,flash,session,request
 from functools import wraps
 from datetime import datetime
@@ -7,19 +10,21 @@ from webapp.forms import LogInForm,RegisterForm,ChangeImage
 from webapp.models import Permission,db,User
 
 from flask_security import login_required,current_user
+from flask_security.utils import login_user
 from flask_mail import Message
 from webapp.extensions import mail,icon
 from webapp.fortoken import generote_confirmation_token,back_confirmation_token
 from werkzeug.utils import secure_filename
+from PIL import Image
 
-username=None#如果没有登陆用户名一直为空
 
 # from webapp import app
 community_blue = Blueprint(
     'communityBlueName',
     __name__,
     # template_folder=path.join(path.pardir,'templates','main'),
-    template_folder='../templates/communityTemp/'
+    template_folder='../templates/communityTemp/',
+    static_folder='webapp/static/img/avatar'
 )
 
 @community_blue.route('/')
@@ -32,6 +37,7 @@ def communityMain():
 
 @community_blue.route('/communityWaike.html')
 def communityWaike():
+    username = current_user._get_current_object().username
     return render_template('communityWaike.html',username=username)
 
 @community_blue.route('/communityDoctor.html')
@@ -81,8 +87,8 @@ def login():
                 return render_template('login.html',formHtml=form)
 
             if user.password==password:
-                global username  #这样定义就使函数外之前定义的那个username 生效
-                username=user.username
+                login_user(user)
+                username=current_user._get_current_object().username
                 return render_template('communityMain.html',formHtml=form,username=username)
             else:
                 form.password.errors.append("密码输入错误")
@@ -98,10 +104,6 @@ def login():
 emailToConfirm=None #用于确认登陆
 @community_blue.route('/register.html',methods=['GET','POST'])
 def register():
-    # userEmail=None
-    # userName=None
-    # password=None
-    # passwordAgain=None
     form=RegisterForm()
     if form.validate_on_submit():
         print('注册验证')
@@ -134,10 +136,6 @@ def register():
         return "注册成功，请到注册邮箱确认注册"
     return render_template('register.html',
                            formHtml=form
-                           # emailHtml=userEmail,
-                           # usernameHtml=userName,
-                           # passwordHtml=password,
-                           # passwordAgainHtml=passwordAgain
                            )
 
 @community_blue.route('/confirm/<token>')
@@ -151,12 +149,58 @@ def confirm_token(token):
 
 
 @community_blue.route('/personalInfo.html',methods=['GET','POST'])
+@login_required
 def persionalInfo():
     form=ChangeImage()
+    username = current_user._get_current_object().username
+    src = current_user._get_current_object().path
+
     if form.validate_on_submit():
-        print(111)
+        #获取文件名
+        index=src.rfind('/')
+        old_filename = src[index+1:]
+
+        # 先删除原有文件
+        #当我们不知道当前路径真正的位置我们可以打印
+        # print(os.getcwd())
+        os.remove(r'static/img/avatar/'+old_filename)
+
+        email = current_user._get_current_object().email
         file=form.browse.data
-        filename=secure_filename(file.filename)
-        icon.save(file,name=filename)
-        return '上传完成'
-    return render_template('personalInfo.html',form=form)
+        #头像缩放
+        # im = Image.open(file)
+        # size = (60, 60)
+        # im.thumbnail(size)
+        #头像名字
+        filenameTemp=secure_filename(file.filename)
+        #.从右侧出现的第一次位置，没有返回-1。这样做是为了获取头像格式
+        index=filenameTemp.rfind('.')
+        imgStyle=filenameTemp[index:]
+        #去掉邮箱名的.,并加上时间戳,并变成秒，保证头像名字的唯一性
+        filename=email.replace('.','')+str(int(time.time()*1000))+imgStyle
+
+
+        icon.save(file, name=filename)
+        # im.save(os.path.join(community_blue.static_folder, filename))
+        # 这是为模板文件提供的路径
+        src=r'../../static/img/avatar/'+filename
+        current_user._get_current_object().path=src
+        db.session.query(User).filter(User.email==email).update({User.path:src})
+        db.session.commit()
+        return render_template('personalInfo.html', form=form, username=username, src=src)
+
+        #替换头像：
+        # else:
+        #     #获取文件名
+        #     index=src.rfind('/')
+        #     filename = src[index+1:]
+        #
+        #     # 先删除原有文件
+        #     #当我们不知道当前路径真正的位置我们可以打印
+        #     # print(os.getcwd())
+        #     os.remove(r'static/img/avatar/'+filename)
+        #     file = form.browse.data
+        #     icon.save(file, name=filename)
+        #     return render_template('personalInfo.html',form=form,username=username,src=src)
+
+    return render_template('personalInfo.html',form=form,username=username,src=src)
