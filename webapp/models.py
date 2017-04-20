@@ -55,6 +55,9 @@ class User(db.Model,UserMixin):
         self.password=password
         self.confirmed_at=confirmed_at
 
+    def is_authenticated(self):
+        return True
+
     def can(self,permissions):
         if self.roles is None:
             return False
@@ -142,14 +145,16 @@ class Note(db.Model):
     class_id = db.Column(db.Integer(),db.ForeignKey('operation_class.id'))
 
     #与回复表是一对多的关系
-    reply_id=db.relationship('Reply',backref='note',lazy='dynamic')
+    replies=db.relationship('Reply',backref='note',lazy='dynamic')
 
 #定义回帖表
 class Reply(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     text=db.Column(db.String(255))
+    confirmed_at = db.Column(db.DateTime())
 
     #外键
     note_id=db.Column(db.Integer(),db.ForeignKey('note.id'))
+    #回帖发起人
     user_id=db.Column(db.Integer(),db.ForeignKey('user.id'))
 

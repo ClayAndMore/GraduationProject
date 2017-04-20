@@ -7,7 +7,7 @@ from flask import Blueprint,redirect,url_for,render_template,abort,flash,session
 from functools import wraps
 from datetime import datetime
 from webapp.forms import LogInForm,RegisterForm,ChangeImage
-from webapp.models import Permission,db,User
+from webapp.models import Permission,db,User,Note,OperationClass
 
 from flask_security import login_required,current_user
 from flask_security.utils import login_user
@@ -33,12 +33,65 @@ def index():
 
 @community_blue.route('/communityMain.html')
 def communityMain():
-    return render_template('communityMain.html')
+    username=None
+    if current_user.is_authenticated:
+        username = current_user._get_current_object().username
+    return render_template('communityMain.html',username=username)
 
 @community_blue.route('/communityWaike.html')
-def communityWaike():
-    username = current_user._get_current_object().username
-    return render_template('communityWaike.html',username=username)
+@community_blue.route('/communityWaike.html/<int:page>')
+def communityWaike(page=1):
+    username=None
+    if current_user.is_authenticated:
+        username = current_user._get_current_object().username
+
+    #定义一个返回的list,包含了所有外科要显示的帖子
+    notes=[]
+    #查询外科的id,会有很多外科的分类
+    wai_ids=db.session.query(OperationClass).filter(OperationClass.class1=='外科').all()
+    l=[]
+    for x in wai_ids:
+        l.append(x.id)
+
+        #根据id查询相关外科的所有帖子,没有返回[]，根据时间来排序,从页数开始，每页返回10个数据
+    # wai_notes=db.session.query(Note).filter(Note.class_id.in_(l)).order_by(Note.time).all()
+    wai_notes=Note.query.filter(Note.class_id.in_(l)).order_by(Note.time).paginate(page,10,False)
+
+    for temp in wai_notes.items:
+        #获得发帖人的相关信息
+        publisher=temp.user
+        #获得本贴回复的相关信息
+        replies_list=[]
+        replies=temp.replies.all()
+
+        for reply in replies:
+            #组织回帖内容
+            reply_data={'user':reply.user.username,
+                        'avatar':reply.user.path,
+                        'time':reply.confirmed_at,
+                        'text':reply.text
+            }
+            replies_list.append(reply_data)
+
+        #组织回传数据
+        data={'id1':'heading'+str(temp.id),  #用于生成标签id
+              'id2':'collapse'+str(temp.id),
+              'title':temp.title,
+              'class':temp.operation_class.class2,
+              'time':temp.time,
+              'text':temp.text,
+              'author':publisher.username,
+              'avatar':publisher.path,
+              'reply':replies_list}
+        notes.append(data)
+
+    for page in wai_notes.iter_pages():
+            print(page)
+    return render_template('communityWaike.html',
+                           username=username,
+                           notes=notes,
+                           pagination=wai_notes,
+                           endpoint="communityBlueName.communityWaike")
 
 @community_blue.route('/communityDoctor.html')
 @login_required
@@ -59,10 +112,10 @@ def permission_required(permission):
 def admin_required(f):
     return permission_required(Permission.ADMINISTER)(f)
 
-@community_blue.route('/admin')
-@login_required
-def admin():
-    return render_template('admin/index.html')
+# @community_blue.route('/admin')
+# @login_required
+# def admin():
+#     return render_template('admin/index.html')
 
 
 @community_blue.route('/login.html',methods=['GET','POST'])
@@ -151,9 +204,15 @@ def confirm_token(token):
 @community_blue.route('/personalInfo.html',methods=['GET','POST'])
 @login_required
 def persionalInfo():
+
     form=ChangeImage()
     username = current_user._get_current_object().username
     src = current_user._get_current_object().path
+
+    #换名字
+    if request.method=='POST':
+        print(1111)
+        print(request.values)
 
     if form.validate_on_submit():
         #获取文件名
@@ -189,18 +248,5 @@ def persionalInfo():
         db.session.commit()
         return render_template('personalInfo.html', form=form, username=username, src=src)
 
-        #替换头像：
-        # else:
-        #     #获取文件名
-        #     index=src.rfind('/')
-        #     filename = src[index+1:]
-        #
-        #     # 先删除原有文件
-        #     #当我们不知道当前路径真正的位置我们可以打印
-        #     # print(os.getcwd())
-        #     os.remove(r'static/img/avatar/'+filename)
-        #     file = form.browse.data
-        #     icon.save(file, name=filename)
-        #     return render_template('personalInfo.html',form=form,username=username,src=src)
-
     return render_template('personalInfo.html',form=form,username=username,src=src)
+

@@ -2,87 +2,114 @@
 {% block tochange %}
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-            <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingOne">
-                    <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
-                           aria-expanded="true" aria-controls="collapseOne">
-                            Collapsible Group Item #1
-                        </a>
-                    </h4>
-                </div>
-                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-                    <div class="panel-body">
-                        <ul class="media-list">
-                            <li class="media">
-                                <div class="media-left">
-                                    <a href="#">
-                                        <img class="media-object" src="../../static/img/hospitalIOCt.ico" alt="64x64" style="width: 64px; height: 64px;">
-                                    </a>
-                                </div>
-                                <div class="media-body">
-                                    <h4 class="media-heading">Media heading</h4>
-                                   <P>dcccccccccccccccccccccccccc</P>
-                                    <div class="media">
-                                        <div class="media-left">
-                                            <a href="#">
-                                                <img class="media-object" src="../../static/img/hospitalIOCt.ico" alt="..." style="width: 64px; height: 64px;">
-                                            </a>
-                                        </div>
-                                        <div class="media-body">
-                                            <h4 class="media-heading">Media heading</h4>
-                                            <p>22222222<p>
-                                        </div>
+
+            {% for data in notes %}
+
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="{{ data['id1'] }}">
+                        <h4 class="panel-title" style="display: inline;">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#{{ data['id2'] }}"
+                               aria-expanded="true" aria-controls="{{ data['id2'] }}">
+                                {{ data['title'] }}
+                            </a>
+                        </h4>
+                        <h4 style="display: inline;float: right;">
+                            {{ data['class'] }}
+                        </h4>
+                        <h4 style="display: inline;float: right;">
+                            {{ data['time'] }}
+                        </h4>
+                    </div>
+                    <div id="{{ data['id2'] }}" class="panel-collapse collapse in" role="tabpanel"
+                         aria-labelledby="{{ data['id1'] }}">
+                        <div class="panel-body">
+
+                            <ul class="media-list">
+                                <li class="media">
+                                    <div class="media-left">
+                                        <a href="#">
+                                            <img class="media-object" src="{{ data['avatar'] }}" alt="64x64"
+                                                 style="width: 64px; height: 64px;">
+                                        </a>
                                     </div>
-                                </div>
-                            </li>
-                        </ul>
+
+                                    <div class="media-body">
+                                        <h4 class="media-heading">{{ data['author'] }}</h4>
+                                        <P> {{ data['text'] }}</P>
+
+                                        {% for reply in data['reply'] %}
+                                            <div class="media">
+                                                <div class="media-left">
+                                                    <a href="#">
+                                                        <img class="media-object" src="{{ reply['avatar'] }}" alt="..."
+                                                             style="width: 64px; height: 64px;">
+                                                    </a>
+                                                </div>
+                                                <div class="media-body">
+                                                    <h4 class="media-heading">{{ reply['user'] }}</h4>
+                                                    <h5 style="display: inline;float: right;"> {{ reply['time'] }}</h5>
+                                                    <p>{{ reply['text'] }}<p>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+
+
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+
+            {% endfor %}
         </div>
-        <div class="panel panel-default">
-            <div class="panel-heading" role="tab" id="headingTwo">
-                <h4 class="panel-title">
-                    <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
-                       href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                        Collapsible Group Item #2
+
+        {#    分页,endpoint是视图函数的名字#}
+{#        {{ render_pagination(pagination,endpoint)}}#}
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li>
+                    {% if pagination.has_prev %}
+                        <a href="{{ url_for(endpoint,page=pagination.prev().page) }}"
+                           aria-label="Previous">
+                    {% else %}
+                        <a href="{{ url_for(endpoint,page=1) }}"
+                           aria-label="Previous">
+                    {% endif %}
+                    <span aria-hidden="true">&laquo;</span>
                     </a>
-                </h4>
-            </div>
-            <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-                <div class="panel-body">
-                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid.
-                    3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt
-                    laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin
-                    coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes
-                    anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings
-                    occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard
-                    of them accusamus labore sustainable VHS.
-                </div>
-            </div>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading" role="tab" id="headingThree">
-                <h4 class="panel-title">
-                    <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
-                       href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                        Collapsible Group Item #3
+                </li>
+                {#                iter_pages()返回pagination的所有页数#}
+                {% for page in pagination.iter_pages() %}
+                    {% if page %}
+                        {% if page!=pagination.page %}
+                            <li>
+                                <a href="{{ url_for(endpoint, page=page) }}">
+                                    {{ page }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li><a href="">{{ page }}</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li><a href="">...</a></li>
+                    {% endif %}
+                {% endfor %}
+                <li>
+                    {% if pagination.has_next %}
+                        <a href="{{ url_for(endpoint, page=pagination.next().page ) }}" aria-label="Next">
+                    {% else %}
+                        <a href="">
+                    {% endif %}
+                        <span aria-hidden="true">&raquo;</span>
                     </a>
-                </h4>
-            </div>
-            <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
-                <div class="panel-body">
-                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid.
-                    3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt
-                    laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin
-                    coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes
-                    anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings
-                    occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard
-                    of them accusamus labore sustainable VHS.
-                </div>
-            </div>
-        </div>
+                <li>
+            </ul>
+        </nav>
     </div>
+
+
+
 
 {% endblock %}

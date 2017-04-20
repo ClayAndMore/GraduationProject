@@ -30,6 +30,7 @@ def index2(item):
 @index_blue.route('/search')
 def search():
     print('访问了/search')
+    #如果tosearch没有值，则赋赋值''
     searchStr=request.args.get('tosearch','')
     operationtype=db.session.query(OperationType).filter(OperationType.operation_name==searchStr).first()
     print(operationtype)
