@@ -14,7 +14,7 @@ class Permission(object):
     PERMISSION_MAP={
         LOGIN:('login','Login user'),
         EDITOR:('editor','Editor'),
-        OPERATOR:('op','Operator'),
+        OPERATOR:('opera','Operator'),
         ADMINISTER:('admin','Super administrator')
     }
 
@@ -32,6 +32,11 @@ class Role(db.Model,RoleMixin):
     permissions=db.Column(db.Integer,default=Permission.LOGIN)
     description=db.Column(db.String(255))
 
+    def __init__(self,name,permission,description):
+        self.name=name,
+        self.permissions=permission,
+        self.description=description
+
 class User(db.Model,UserMixin):
     id = db.Column(db.Integer(), primary_key=True)
     email=db.Column(db.String(255),unique=True)
@@ -39,7 +44,7 @@ class User(db.Model,UserMixin):
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean())   #定义是否点击邮箱中的确认链接
     # image=db.Column(db.LargeBinary())   #储存头像
-    path=db.Column(db.String(255)) #储存头像路径
+    path=db.Column(db.String(255),default='../../static/img/upload.jpg') #储存头像路径
     confirmed_at=db.Column(db.DateTime())
 
     # 与帖子一对多的关系

@@ -100,7 +100,7 @@ function kouQiangButton() {
 }
 
 function toCummunityClick() {
-    window.open('communityMain.html');
+    window.open('communityMain');
 }
 
 function searchOnclick() {

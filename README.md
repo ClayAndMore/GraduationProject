@@ -36,3 +36,16 @@ window10下的pycharm 开发，python3.5。
 4月16日
 添加了flask_admin的认证登陆，不然任何用户都可以访问/admin.
 添加了外科发帖。
+
+4月20日 
+完善了发帖功能，将发帖功能集成一个公用的函数，
+新发现：a标签的href可以用url_for
+from flask_security.utils import login_user
+中，login_user(用户对象)，如果用户对象active属性为1才能真正登陆。
+将分页函数抽离出来到note_index_macro.html,用的时候在再导入。
+
+4月21日
+添加了发帖表单。
+添加了用户权限数据。
+完善了注册。
+新建了user_blue蓝图，将用户的登陆和注册等都放到此蓝图下。

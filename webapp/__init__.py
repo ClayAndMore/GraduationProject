@@ -4,6 +4,7 @@ from flask import Flask,redirect,url_for,request,flash
 from webapp.models import db,User
 from webapp.controllers.community_blue import community_blue
 from webapp.controllers.index import index_blue
+from webapp.controllers.user_blue import user_blue
 from webapp.forms import LogInForm
 
 from webapp.extensions import user_datastore,admin,mail,icon,csrf
@@ -25,6 +26,7 @@ def create_app(object_name):
 
     app.register_blueprint(index_blue)
     app.register_blueprint(community_blue)
+    app.register_blueprint(user_blue)
 
     return app
 

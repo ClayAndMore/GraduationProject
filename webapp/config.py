@@ -9,6 +9,7 @@ class Config(object):
     MAIL_USERNAME = '422516721@qq.com'  # 邮件账户用户名
     MAIL_PASSWORD = 'mnwasfnnmrnwbgdd'  # 邮件账户的密码
 
+    MAIL_TO_BACK='http://127.0.0.1:5000/' #确认注册的链接地址
     #图片上传
     from flask_uploads import IMAGES
     UPLOADED_TEST_DEST = r'D:\WorkSpace\pyWorkSpace\bisheFlask\webapp\static\img\avatar'

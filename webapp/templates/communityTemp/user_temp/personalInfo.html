@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>个人信息</title>
+
+    <!-- Bootstrap -->
+    <link href="../../../static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="container-fluid">
+
+    <div class="row">
+        {% if not src %}
+            <img class="col-xs-6" src="../../../static/img/upload.jpg" alt="256x256" style="width: 256px; height: 256px;">
+        {% else %}
+            <img class="col-xs-6" src="{{ src }}" alt="256x256" style="width: 256px; height: 256px;">
+        {% endif %}
+
+        <div class="page-header col-xs-2">
+            <h3>更换你的头像</h3>
+
+            <form action="" method=post enctype=multipart/form-data>
+                {{ form.csrf_token }}
+                {{ form.browse(class="btn btn-default")}}
+                {% if form.browse.errors %}
+                    {% for e in form.browse.errors %}
+                        <p class="help-block" style="color: red">{{ e }}</p>
+                    {% endfor %}
+                {% else %}
+                    <br>
+                {% endif %}
+                {{ form.upload(class="btn btn-default")}}
+                {% if form.upload.errors %}
+                    {% for e in form.upload.errors %}
+                        <p class="help-block" style="color: red">{{ e }}</p>
+                    {% endfor %}
+                {% else %}
+                    <br>
+                {% endif %}
+                {#        <input type=file name=file><br/>#}
+                {#        <input type=submit value=Upload>#}
+            </form>
+        </div>
+
+    </div>
+    <div class="row">
+        <h3 class="col-xs-4">{{ username }}</h3>
+    </div>
+    <div class="row">
+        <button class="btn btn-primary col-xs-2" type="button" data-toggle="collapse" data-target="#collapseExample"
+                aria-expanded="false" aria-controls="collapseExample">
+            更改用户名
+        </button>
+    </div>
+    <div class="row">
+         <div class="collapse col-xs-4" id="collapseExample">
+            <div class="well">
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label for="InputName">用户名：</label>
+                        <input type="text" class="form-control" id="InputName" placeholder="{{ username }}"
+                               maxlength="10">
+                    </div>
+                    <button class="btn btn-default" onclick="changeName()">提交</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="../../../static/js/jquery-3.1.1.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="../../../static/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    function changeName() {
+        $.ajax({
+            type: 'POST',
+            url: $SCRIPT_ROOT+'/getname',
+            data: $('#InputName').val(),
+            error: function (xhr, err) {
+                console.log('请求失败，原因可能是：' +xhr+ err + '！')
+            },
+            success: function (data) {
+                console.log('成功')
+            }
+
+        });
+    }
+</script>
+</body>
+</html>
