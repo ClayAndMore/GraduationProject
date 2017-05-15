@@ -1,4 +1,4 @@
-from flask import Flask,redirect,url_for,request,flash
+from flask import Flask,redirect,url_for,request,flash,session,render_template
 # from webapp.config import DevConfig
 
 from webapp.models import db,User
@@ -10,7 +10,7 @@ from webapp.forms import LogInForm
 from webapp.extensions import user_datastore,admin,mail,icon,csrf
 
 
-from flask_security import Security
+from flask_security import Security,url_for_security,login_user
 from flask_uploads import configure_uploads
 
 def create_app(object_name):
@@ -34,36 +34,43 @@ app=create_app('webapp.config.DevConfig')
 
 # configure_uploads(app,icon)
 
-security = Security(app, user_datastore)#login_form=LogInForm
+security = Security(app, user_datastore,register_blueprint=user_blue)#login_form=LogInForm
 
-#社区医生选项卡，权限页面，不支持工厂模式创建，只能在app初始后再定义
+#需要登陆的权限页面，不支持工厂模式创建，只能在app初始后再定义
 @security.login_context_processor
 def security_login_context_processor():
     print(11111)
     form = LogInForm(request.form)
-
     if form.validate_on_submit():
-        userEmail = form.email.data
-        password = form.password.data
+
+        userEmail=form.email.data
+        password=form.password.data
+
+        # 刷新页面处理，刷新后让原来填的内容不在留在页面
+        session['email']=userEmail
+        form.email.data=''
+
         try:
-            user = db.session.query(User).filter(User.email == userEmail).first()
+            user=db.session.query(User).filter(User.email==userEmail).first()
             # 当输入没有注册的邮箱时，会返回user=None
             if not user:
                 form.email.errors.append("该用户没有注册")
-                form.email.data = ''
+                form.email.data=''
                 return dict(formHtml=form)
 
-            if user.password == password:
+            if user.password==password:
+                login_user(user)
                 return True
             else:
                 form.password.errors.append("密码输入错误")
-                form.password.data = ''
+                form.password.data=''
                 return dict(formHtml=form)
-        except:
+        except Exception as e:
+            print(e)
             flash(message="数据库连接异常，请联系管理员")
             # form.email.errors.append("该用户没有注册")
             return dict(formHtml=form)
-    return dict(formHtml=form)
+    return dict(formHtml = form)
 
 #在IDE中点击运行会在这里开始走，而在manage.py里运行shell 命令不会从这里走 会从manage里走。
 if __name__ == '__main__':

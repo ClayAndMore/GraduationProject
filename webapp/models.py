@@ -12,10 +12,10 @@ class Permission(object):
     OPERATOR=0x04
     ADMINISTER=0xff
     PERMISSION_MAP={
-        LOGIN:('login','Login user'),
-        EDITOR:('editor','Editor'),
-        OPERATOR:('opera','Operator'),
-        ADMINISTER:('admin','Super administrator')
+        LOGIN:('login','普通用户'),
+        EDITOR:('editor','文章作者'),
+        OPERATOR:('opera','医生权限'),
+        ADMINISTER:('admin','超级管理员')
     }
 
 #用户和权限的关系表
@@ -36,6 +36,9 @@ class Role(db.Model,RoleMixin):
         self.name=name,
         self.permissions=permission,
         self.description=description
+
+    def __repr__(self):
+        return "权限 '{}' 说明'{}' ".format(self.name,self.description)
 
 class User(db.Model,UserMixin):
     id = db.Column(db.Integer(), primary_key=True)
@@ -59,6 +62,9 @@ class User(db.Model,UserMixin):
         self.username=username
         self.password=password
         self.confirmed_at=confirmed_at
+
+    def __repr__(self):
+        return "<用户名 '{}'，邮箱 '{}'".format(self.username,self.email)
 
     def is_authenticated(self):
         return True
@@ -98,6 +104,9 @@ class OperationClass(db.Model):
     # 和帖子是一对多的关系
     replies=db.relationship('Note',backref='operation_class',lazy='dynamic')
 
+    def __repr__(self):
+        return "手术父类别：'{}',子类别：'{}'".format(self.class1,self.class2)
+
 # 手术类型
 class OperationType(db.Model):
     __tablename__ = 'operation_type'
@@ -114,6 +123,9 @@ class OperationType(db.Model):
     # 药物和设备都是多对多的关系
     medicines=db.relationship('Medicine',secondary=operations_medicines,backref=db.backref('operation_type',lazy='dynamic'))
     equips=db.relationship('Equip',secondary=operations_equips,backref=db.backref('operation_type',lazy='dynamic'))
+
+    def __repr__(self):
+        return "'{}'".format(self.operation_name)
 
     @property
     def serialize(self):
@@ -133,11 +145,16 @@ class Medicine(db.Model):
     medicine_name=db.Column(db.String(60))
     medicine_other=db.Column(db.String(255))
 
+    def __repr__(self):
+        return "'{}' '{}'".format(self.west_or_china,self.medicine_name)
+
 class Equip(db.Model):
     id=db.Column(db.Integer(),primary_key=True)
     equip_name=db.Column(db.String(60))
     equip_other=db.Column(db.String(255))
 
+    def __repr__(self):
+        return "'{}'".format(self.equip_name)
 
 #定义帖子表
 class Note(db.Model):
@@ -152,6 +169,14 @@ class Note(db.Model):
     #与回复表是一对多的关系
     replies=db.relationship('Reply',backref='note',lazy='dynamic')
 
+    def __init__(self,title,text,time):
+        self.title=title
+        self.time=time
+        self.text=text
+
+    def __repr__(self):
+        return "帖子 '{}' 发起人'{}' '{}'".format(self.title,self.user.username,self.time)
+
 #定义回帖表
 class Reply(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
@@ -163,3 +188,5 @@ class Reply(db.Model):
     #回帖发起人
     user_id=db.Column(db.Integer(),db.ForeignKey('user.id'))
 
+    def __repr__(self):
+        return "回帖人：'{}'，对'{}'的回帖'".format(self.user.username,self.note.title)

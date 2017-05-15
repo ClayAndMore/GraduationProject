@@ -24,5 +24,5 @@ class DevConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:123456@127.0.0.1:3306/graduatedb?charset=utf8'
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     # 定义西药跳转到登陆页面时触发的模板
-    SECURITY_LOGIN_USER_TEMPLATE='communityTemp/login.html'
+    SECURITY_LOGIN_USER_TEMPLATE='communityTemp/user_temp/login.html'
     SECURITY_PASSWORD_SALT='activate-salt'

@@ -1,12 +1,13 @@
 # 这个社区登陆的蓝图
 
+import datetime
 from flask import Blueprint,redirect,url_for,render_template,abort,flash,session,request
 from functools import wraps
 
 from webapp.forms import PostNote
 from webapp.models import Permission,db,User,Note,OperationClass
 
-from flask_security import login_required,current_user
+from flask_security import login_required,current_user,roles_accepted
 
 
 community_blue = Blueprint(
@@ -30,8 +31,28 @@ def index():
 
 @community_blue.route('/communityMain')
 def communityMain():
+    permiss_str=None
     username,src=isCurrentUser()
-    return render_template('communityMain.html',username=username,src=src)
+    #判断当前用户的最高权限
+    #如果有用户名，说明已登陆，登陆时才判断权限
+    if username:
+        #得到该用户的所有权限
+        user_roles=current_user._get_current_object().roles
+        #将各个权限的权限值取出
+        top_role=[]
+        for role in user_roles:
+            top_role.append(role.permissions)
+
+        #最高权限的值
+        max_int=max(top_role)
+        #找到最高权限的下标
+        temp=top_role.index(max_int)
+        #返回该权限的说明,可以去看权限的结构
+        permiss_str=user_roles[temp].description
+
+    return render_template('communityMain.html',
+                           username=username,src=src,
+                           permiss_str=permiss_str)
 
 #定义一个方法，加载各科目帖子的方法，达到共用的目的
 def getNotes(page,opera_class_name):
@@ -43,9 +64,9 @@ def getNotes(page,opera_class_name):
     for x in wai_ids:
         l.append(x.id)
 
-        # 根据id查询相关外科的所有帖子,没有返回[]，根据时间来排序,从页数开始，每页返回10个数据
+        # 根据id查询相关外科的所有帖子,没有返回[]，根据时间来逆向排序,从页数开始，每页返回10个数据
     # wai_notes=db.session.query(Note).filter(Note.class_id.in_(l)).order_by(Note.time).all()
-    wai_notes = Note.query.filter(Note.class_id.in_(l)).order_by(Note.time).paginate(page, 10, False)
+    wai_notes = Note.query.filter(Note.class_id.in_(l)).order_by(Note.time.desc()).paginate(page, 10, False)
 
     for temp in wai_notes.items:
         # 获得发帖人的相关信息
@@ -76,8 +97,16 @@ def getNotes(page,opera_class_name):
         notes.append(data)
     return notes,wai_notes
 
-@community_blue.route('/communityWaike')
-@community_blue.route('/communityWaike/<int:page>')
+#定义一个函数查询所有的手术分类,用于渲染发帖的下拉列表
+def queryClass():
+    class1_list=[]
+    classes=db.session.query(OperationClass).group_by(OperationClass.class1).all()
+    for x in classes:
+        class1_list.append((x.id,x.class1))
+    return class1_list
+
+@community_blue.route('/communityWaike',methods=['GET','POST'])
+@community_blue.route('/communityWaike/<int:page>',methods=['GET','POST'])
 def communityWaike(page=1):
     username,src=isCurrentUser()
 
@@ -85,13 +114,28 @@ def communityWaike(page=1):
     notes,wai_notes=getNotes(page,opera_class_name)
 
     note_form=PostNote()
+    note_form.opera_class.choices=queryClass()
+
     #发帖
     if note_form.validate_on_submit():
         #说明已经登陆
         if username:
-            pass
+            title=note_form.title.data
+            note_class=note_form.opera_class.data  #得到的是OperationClass中的id
+            note_text=note_form.text_area.data
+            note_time=datetime.datetime.now()
+
+            note=Note(title=title,text=note_text,time=note_time)
+            note.user_id=current_user._get_current_object().id
+            note.class_id=note_class
+
+            db.session.add(note)
+            db.session.commit()
+
+            return redirect(url_for('communityBlueName.communityWaike'))
+
         else:
-            return redirect(url_for('communityBlueName.login'))
+            return redirect(url_for('userBlue.login'))
 
     return render_template('communityOption.html',
                            username=username,
@@ -101,14 +145,36 @@ def communityWaike(page=1):
                            endpoint="communityBlueName.communityWaike",
                            note_form=note_form)
 
-@community_blue.route('/communityFuchan')
-@community_blue.route('/communityFuchan/<int:page>')
+@community_blue.route('/communityFuchan',methods=['GET','POST'])
+@community_blue.route('/communityFuchan/<int:page>',methods=['GET','POST'])
 def communityFuchan(page=1):
     username,src = isCurrentUser()
     opera_class_name = '妇产科'
     notes, wai_notes = getNotes(page, opera_class_name)
 
     note_form = PostNote()
+    note_form.opera_class.choices = queryClass()
+
+    # 发帖
+    if note_form.validate_on_submit():
+        # 说明已经登陆
+        if username:
+            title = note_form.title.data
+            note_class = note_form.opera_class.data  # 得到的是OperationClass中的id
+            note_text = note_form.text_area.data
+            note_time = datetime.datetime.now()
+
+            note = Note(title=title, text=note_text, time=note_time)
+            note.user_id = current_user._get_current_object().id
+            note.class_id = note_class
+
+            db.session.add(note)
+            db.session.commit()
+
+            return redirect(url_for('communityBlueName.communityFuchan'))
+
+        else:
+            return redirect(url_for('userBlue.login'))
     return render_template('communityOption.html',
                            username=username,
                            src=src,
@@ -117,14 +183,36 @@ def communityFuchan(page=1):
                            endpoint="communityBlueName.communityFuchan",
                            note_form=note_form)
 
-@community_blue.route('/communityEye')
-@community_blue.route('/communityEye/<int:page>')
+@community_blue.route('/communityEye',methods=['GET','POST'])
+@community_blue.route('/communityEye/<int:page>',methods=['GET','POST'])
 def communityEye(page=1):
     username,src = isCurrentUser()
     opera_class_name = '眼科'
     notes, wai_notes = getNotes(page, opera_class_name)
 
     note_form = PostNote()
+    note_form.opera_class.choices = queryClass()
+
+    # 发帖
+    if note_form.validate_on_submit():
+        # 说明已经登陆
+        if username:
+            title = note_form.title.data
+            note_class = note_form.opera_class.data  # 得到的是OperationClass中的id
+            note_text = note_form.text_area.data
+            note_time = datetime.datetime.now()
+
+            note = Note(title=title, text=note_text, time=note_time)
+            note.user_id = current_user._get_current_object().id
+            note.class_id = note_class
+
+            db.session.add(note)
+            db.session.commit()
+
+            return redirect(url_for('communityBlueName.communityEye'))
+
+        else:
+            return redirect(url_for('userBlue.login'))
     return render_template('communityOption.html',
                            username=username,
                            src=src,
@@ -133,14 +221,36 @@ def communityEye(page=1):
                            endpoint="communityBlueName.communityEye",
                            note_form=note_form)
 
-@community_blue.route('/communityErbihou')
-@community_blue.route('/communityErbihou/<int:page>')
+@community_blue.route('/communityErbihou',methods=['GET','POST'])
+@community_blue.route('/communityErbihou/<int:page>',methods=['GET','POST'])
 def communityErbihou(page=1):
     username,src= isCurrentUser()
     opera_class_name = '耳鼻喉科'
     notes, wai_notes = getNotes(page, opera_class_name)
 
     note_form = PostNote()
+    note_form.opera_class.choices = queryClass()
+
+    # 发帖
+    if note_form.validate_on_submit():
+        # 说明已经登陆
+        if username:
+            title = note_form.title.data
+            note_class = note_form.opera_class.data  # 得到的是OperationClass中的id
+            note_text = note_form.text_area.data
+            note_time = datetime.datetime.now()
+
+            note = Note(title=title, text=note_text, time=note_time)
+            note.user_id = current_user._get_current_object().id
+            note.class_id = note_class
+
+            db.session.add(note)
+            db.session.commit()
+
+            return redirect(url_for('communityBlueName.communityErbihou'))
+
+        else:
+            return redirect(url_for('userBlue.login'))
     return render_template('communityOption.html',
                            username=username,
                            src=src,
@@ -149,14 +259,36 @@ def communityErbihou(page=1):
                            endpoint="communityBlueName.communityErbihou",
                            note_form=note_form)
 
-@community_blue.route('/communityKouqiang')
-@community_blue.route('/communityKouqiang/<int:page>')
+@community_blue.route('/communityKouqiang',methods=['GET','POST'])
+@community_blue.route('/communityKouqiang/<int:page>',methods=['GET','POST'])
 def communityKouqiang(page=1):
     username,src = isCurrentUser()
     opera_class_name = '口腔科'
     notes, wai_notes = getNotes(page, opera_class_name)
 
     note_form = PostNote()
+    note_form.opera_class.choices = queryClass()
+
+    # 发帖
+    if note_form.validate_on_submit():
+        # 说明已经登陆
+        if username:
+            title = note_form.title.data
+            note_class = note_form.opera_class.data  # 得到的是OperationClass中的id
+            note_text = note_form.text_area.data
+            note_time = datetime.datetime.now()
+
+            note = Note(title=title, text=note_text, time=note_time)
+            note.user_id = current_user._get_current_object().id
+            note.class_id = note_class
+
+            db.session.add(note)
+            db.session.commit()
+
+            return redirect(url_for('communityBlueName.communityKouqiang'))
+
+        else:
+            return redirect(url_for('userBlue.login'))
     return render_template('communityOption.html',
                            username=username,
                            src=src,
@@ -166,10 +298,33 @@ def communityKouqiang(page=1):
                            note_form=note_form)
 
 
-@community_blue.route('/communityDoctor')
+def permission_required(permission):
+    def decorator(f):
+        @wraps(f)
+        def _deco(*args,**kwargs):
+            if not current_user.can(permission):
+                abort(403,'you can\'t browse it because no permission')
+            return f(*args,**kwargs)
+        return _deco
+    return decorator
+#定义一个医生权限的装饰器
+def doctor_required(f):
+    return permission_required(Permission.OPERATOR)(f)
+#管理员的权限
+def admin_required(f):
+    return permission_required(Permission.ADMINISTER)(f)
+
+
+@community_blue.route('/communityDoctor',)
 @login_required
+# @roles_accepted('opera', 'admin')
+@doctor_required
 def communityDoctor():
-    return render_template('communityDoctor.html')
+    username, src = isCurrentUser()
+    return render_template('communityDoctor.html',
+                           username=username,
+                           src=src,
+                           )
 
 #联系我们
 @community_blue.route('/Contact')
@@ -177,18 +332,6 @@ def contact():
     return None
 
 
-def permission_required(permission):
-    def decorator(f):
-        @wraps(f)
-        def _deco(*args,**kwargs):
-            if not current_user.can(permission):
-                abort(403,'您没有权限访问')
-            return f(*args,**kwargs)
-        return _deco
-    return decorator
-
-def admin_required(f):
-    return permission_required(Permission.ADMINISTER)(f)
 
 
 

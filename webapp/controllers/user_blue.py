@@ -45,8 +45,7 @@ def login():
 
             if user.password==password:
                 login_user(user)
-                username=current_user._get_current_object().username
-                return render_template('communityMain.html',formHtml=form,username=username)
+                return redirect(url_for('communityBlueName.communityMain'))
             else:
                 form.password.errors.append("密码输入错误")
                 form.password.data=''
@@ -83,7 +82,7 @@ def register():
                   username=userName,
                   password=password,
                   confirmed_at=datetime.datetime.now())
-        #为此用户添加权限
+        #为此用户添加默认权限
         role=db.session.query(Role).filter(Role.permissions==Permission.LOGIN).first()
         user.roles=[role]
         try:

@@ -61,23 +61,38 @@
                 </div>
             {% endfor %}
         </div>
-    {#    分页,endpoint是视图函数的名字#}
-    {% import 'note_index_macro.html' as index %}
-    <div class="center-block">
-        {{ index.render_pagination(pagination,endpoint)}}
-    </div>
-         <!--定义一个编辑框-->
+        {#    分页,endpoint是视图函数的名字#}
+        {% import 'note_index_macro.html' as index %}
+        <div class="center-block">
+            {{ index.render_pagination(pagination,endpoint) }}
+        </div>
+        <!--定义一个编辑框-->
         {% if note_form %}
             {#    发帖#}
-            <form class="form-horizontal">
+            <form class="form-horizontal" method="post">
+                {{ note_form.hidden_tag() }}
                 <div class="form-group">
                     {{ note_form.title.label(for="forPostTitle",class="col-sm-1 control-label") }}
                     <div class="col-sm-5">
+                        {% if note_form.title.errors %}
+                            {% for e in note_form.title.errors %}
+                                <p class="help-block" style="color: red">{{ e }}</p>
+                            {% endfor %}
+                        {% else %}
+                            <br>
+                        {% endif %}
                         {{ note_form.title( id="forPostTitle",class="form-control") }}
                     </div>
 
                     {{ note_form.opera_class.label(for="forPostClass",class="col-sm-1 control-label") }}
                     <div class="col-sm-4">
+                        {% if note_form.opera_class.errors %}
+                            {% for e in note_form.opera_class.errors %}
+                                <p class="help-block" style="color: red">{{ e }}</p>
+                            {% endfor %}
+                        {% else %}
+                            <br>
+                        {% endif %}
                         {{ note_form.opera_class(id="forPostClass", class="form-control") }}
                     </div>
                     <div class="col-sm-1"></div>
@@ -86,6 +101,13 @@
                 <div class="form-group">
                     {{ note_form.text_area.label(class="control-label col-sm-1") }}
                     <div class="col-sm-10">
+                         {% if note_form.text_area.errors %}
+                            {% for e in note_form.text_area.errors %}
+                                <p class="help-block" style="color: red">{{ e }}</p>
+                            {% endfor %}
+                        {% else %}
+                            <br>
+                        {% endif %}
                         {{ note_form.text_area(class="form-control",rows="5") }}
                     </div>
                     <div class="col-sm-1"></div>
@@ -94,9 +116,8 @@
                 <div class="form-group">
                     <div class="col-sm-10"></div>
                     <div class="col-sm-1">
-                        {{ note_form.post(class="btn btn-primary ") }}
+                        {{ note_form.post(type="submit", class="btn btn-primary") }}
                     </div>
-
                     <div class="col-sm-1"></div>
                 </div>
             </form>

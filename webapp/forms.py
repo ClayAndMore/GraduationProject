@@ -1,5 +1,5 @@
 from  flask_wtf import FlaskForm,RecaptchaField
-from wtforms import StringField,PasswordField,SubmitField,FileField,SelectField,TextAreaField
+from wtforms import StringField,PasswordField,SubmitField,FileField,SelectField,TextAreaField,SelectMultipleField
 from wtforms.validators import DataRequired,Length,Email,EqualTo
 from flask_security import LoginForm
 
@@ -50,14 +50,17 @@ class ChangeImage(FlaskForm):
 class PostNote(FlaskForm):
     title=StringField(
         '标题',
-        validators=[DataRequired()]
+        validators=[DataRequired(message=showRequiredStr)]
     )
     opera_class=SelectField(
-        '所属科目',choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')]
+        '所属科目',
+        validators=[DataRequired(message=showRequiredStr)],
+        coerce=int
+    #     choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')
     )
     text_area=TextAreaField(
         '正文',
-        validators=[DataRequired()])
+        validators=[DataRequired(message=showRequiredStr)])
     post = SubmitField(
         '发帖',
     )
