@@ -1,6 +1,8 @@
 #这个为手术分类的蓝图
 from flask import render_template, Blueprint,request,jsonify
 from webapp.models import db,OperationClass,OperationType
+from xpinyin import Pinyin
+
 
 index_blue = Blueprint(
     'indexBlueName',
@@ -12,7 +14,20 @@ index_blue = Blueprint(
 #首页
 @index_blue.route('/')
 def index():
-    return render_template('index.html')
+    # 获得所有科目
+    class_operations = OperationClass.query.all()
+    operation_pinyin_dict = {}
+    p = Pinyin()
+    for operation in class_operations:
+        class_name = operation.class1
+        if class_name in operation_pinyin_dict:
+            pass
+        else:
+            js_str = ''
+            for pinyin in p.get_pinyin(class_name).split('-'):
+                js_str+=pinyin
+            operation_pinyin_dict[class_name]= js_str +'()'
+    return render_template('index.html',operation_pinyin_dict=operation_pinyin_dict)
 
 @index_blue.route('/index/<item>')
 def index2(item):

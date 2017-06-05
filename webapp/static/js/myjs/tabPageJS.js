@@ -10,7 +10,7 @@ function showFirst() {
     $('#showFirst').css('display','block');
 }
 
-function waiButton() {
+function waike() {
     $('#showFirst').css('display','none');
     var addTemp = heredoc(function () {/*
      <div class="list-group">
@@ -31,7 +31,7 @@ function waiButton() {
     $('#tabPage').append(addTemp);
 }
 
-function fuChanButton() {
+function fuchanke() {
     $('#showFirst').css('display','none');
     var addTemp = heredoc(function () {/*
      <div class="list-group">
@@ -48,7 +48,7 @@ function fuChanButton() {
     $('#tabPage').append(addTemp);
 }
 
-function yanButton() {
+function yanke() {
     $('#showFirst').css('display','none');
     var addTemp = heredoc(function () {/*
      <div class="list-group">
@@ -65,7 +65,7 @@ function yanButton() {
     $('#tabPage').append(addTemp);
 }
 
-function erBiHouButton() {
+function erbihouke() {
     $('#showFirst').css('display','none');
     var addTemp = heredoc(function () {/*
      <div class="list-group">
@@ -83,7 +83,7 @@ function erBiHouButton() {
     $('#tabPage').append(addTemp);
 }
 
-function kouQiangButton() {
+function kouqiangke() {
     $('#showFirst').css('display','none');
     var addTemp = heredoc(function () {/*
      <div class="list-group">

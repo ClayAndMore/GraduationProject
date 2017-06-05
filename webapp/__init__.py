@@ -39,7 +39,6 @@ security = Security(app, user_datastore,register_blueprint=user_blue)#login_form
 #需要登陆的权限页面，不支持工厂模式创建，只能在app初始后再定义
 @security.login_context_processor
 def security_login_context_processor():
-    print(11111)
     form = LogInForm(request.form)
     if form.validate_on_submit():
 
@@ -75,4 +74,4 @@ def security_login_context_processor():
 #在IDE中点击运行会在这里开始走，而在manage.py里运行shell 命令不会从这里走 会从manage里走。
 if __name__ == '__main__':
 
-    app.run()
+    app.run(port=8000,host='0.0.0.0')
