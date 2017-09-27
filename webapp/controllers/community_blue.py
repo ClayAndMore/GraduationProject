@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 # 这个社区登陆的蓝图
 
 import datetime
@@ -27,7 +28,7 @@ def isCurrentUser():
 
 @community_blue.route('/')
 def index():
-    return redirect('indexBlueName.index')
+    return redirect(url_for('indexBlueName.index'))
 
 @community_blue.route('/communityMain')
 def communityMain():
@@ -60,6 +61,8 @@ def getNotes(page,opera_class_name):
     notes = []
     # 查询外科的id,会有很多外科的分类
     wai_ids = db.session.query(OperationClass).filter(OperationClass.class1 == opera_class_name).all()
+    if not wai_ids:
+        return None,None
     l = []
     for x in wai_ids:
         l.append(x.id)
@@ -325,6 +328,10 @@ def communityDoctor():
                            username=username,
                            src=src,
                            )
+#返回主页
+@community_blue.route('/back')
+def back_home():
+    return redirect(url_for('indexBlueName.index'))
 
 #联系我们
 @community_blue.route('/Contact')

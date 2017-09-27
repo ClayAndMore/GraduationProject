@@ -1,4 +1,5 @@
-#这个为手术分类的蓝图
+# -*- coding:utf-8 -*-
+# 这个为手术分类的蓝图
 from flask import render_template, Blueprint,request,jsonify
 from webapp.models import db,OperationClass,OperationType
 from xpinyin import Pinyin

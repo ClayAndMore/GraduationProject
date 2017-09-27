@@ -122,13 +122,16 @@ def confirm_token(token):
         #将active置1,完成激活。
         #下面这句话返回的是 1，更改过后的数值，而不是user类型。
         # db.session.query(User).filter(User.email==backEmail).update({User.active:1})
+        print('111')
         user=db.session.query(User).filter(User.email==backEmail).first()
+        print('222')
         user.active=1
         db.session.commit()
         print(user.active)
         login_user(user)
         return redirect(url_for('communityBlueName.communityMain'))
     else:
+        print('333')
         return "您的注册信息有风险，请重新注册"
 
 # 定义一个方法，判断是不是当前用户，如果是返回用户名和头像，匿名则返回none
@@ -145,11 +148,6 @@ def persionalInfo():
     form=ChangeImage()
     username,src = isCurrentUser()
     print(src)
-
-    #换名字
-    if request.method=='POST':
-        print(1111)
-        print(request.values)
 
     if form.validate_on_submit():
         #获取文件名
